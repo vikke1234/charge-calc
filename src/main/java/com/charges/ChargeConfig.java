@@ -1,19 +1,19 @@
-package com.example;
+package com.charges;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("example")
-public interface ExampleConfig extends Config
+@ConfigGroup("Charge Calc")
+public interface ChargeConfig extends Config
 {
 	@ConfigItem(
-		keyName = "greeting",
+		keyName = "charges",
 		name = "Welcome Greeting",
 		description = "The message to show to the user when they login"
 	)
-	default String greeting()
+	default int greeting()
 	{
-		return "Hello";
+		return 10;
 	}
 }
