@@ -9,11 +9,11 @@ public interface ChargeConfig extends Config
 {
 	@ConfigItem(
 		keyName = "charges",
-		name = "Welcome Greeting",
-		description = "The message to show to the user when they login"
+		name = "Remove",
+		description = "How many charges should be subtracted from the total amount when filling"
 	)
-	default int greeting()
+	default int amount()
 	{
-		return 10;
+		return 5;
 	}
 }
