@@ -44,7 +44,6 @@ public class ChargePlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.info("Example stopped!");
 	}
 
 	@Subscribe
