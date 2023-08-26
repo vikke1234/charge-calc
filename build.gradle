@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id "com.github.johnrengelman.shadow" version "6.1.0"
 }
 
 repositories {
@@ -29,4 +30,12 @@ version = '1.0'
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 	options.release.set(11)
+}
+
+shadowJar {
+	from sourceSets.test.output
+	configurations = [project.configurations.testRuntimeClasspath]
+	manifest {
+		attributes "Main-Class": "com.charges.ChargePluginTest"
+	}
 }
