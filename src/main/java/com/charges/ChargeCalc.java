@@ -5,23 +5,30 @@ import net.runelite.api.FontID;
 import net.runelite.api.VarClientStr;
 import net.runelite.api.widgets.*;
 
+
 public class ChargeCalc {
-    private Client client;
+
+    Client client;
+
     private Widget subtract;
 
     private Widget fill;
+    private Widget all;
 
     public ChargeCalc(Widget parent, Client client) {
         this.client = client;
         if (parent == null) {
             return;
         }
+        this.client = client;
         subtract = parent.createChild(WidgetType.TEXT);
         fill = parent.createChild(WidgetType.TEXT);
+        all = parent.createChild(WidgetType.TEXT);
 
         System.out.println(parent.getWidth());
         prep(subtract, parent.getWidth() / 2 - 60, 5);
-        prep(fill, parent.getWidth() / 2 + 30, 5);
+        prep(fill, parent.getWidth() / 2 - 15, 5);
+        prep(all, parent.getWidth() / 2 + 30, 5);
     }
 
     private void prep(Widget widget, int x, int y) {
@@ -53,11 +60,18 @@ public class ChargeCalc {
             client.setVarcStrValue(VarClientStr.INPUT_TEXT, amount);
         });
 
+        all.setText("All");
+        all.setAction(0, "All");
+        all.setOnOpListener((JavaScriptCallback) ev -> {
+            client.getWidget(WidgetInfo.CHATBOX_FULL_INPUT).setText(String.valueOf(total));
+            client.setVarcStrValue(VarClientStr.INPUT_TEXT, String.valueOf(total));
+        });
+
         fill.setText("Fill");
         fill.setAction(0, "Fill");
         fill.setOnOpListener((JavaScriptCallback) ev -> {
-            client.getWidget(WidgetInfo.CHATBOX_FULL_INPUT).setText(String.valueOf(total));
-            client.setVarcStrValue(VarClientStr.INPUT_TEXT, String.valueOf(total));
+            // Script 112 is the keylistener script, 84 is enter, 0 is the visible key, "" is unused on enter
+            client.runScript(112, 84, 0, "");
         });
     }
 }
