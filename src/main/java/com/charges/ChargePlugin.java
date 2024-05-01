@@ -31,10 +31,11 @@ public class ChargePlugin extends Plugin
 	@Inject
 	private ClientThread clientThread;
 
-	private ChargeCalc set_amount;
-
 	@Inject
 	private ChargeConfig config;
+
+	private ChargeCalc set_amount;
+
 
 	@Override
 	protected void startUp() throws Exception
@@ -63,7 +64,7 @@ public class ChargePlugin extends Plugin
 				Matcher matcher = pattern.matcher(title);
 				if (matcher.find()) {
 					int amount = Integer.parseInt(matcher.group(1).replace(",", ""));
-					set_amount.showWidget(config.amount(), amount);
+					set_amount.showWidget(config, amount);
 				} else {
 					System.out.println("Could not find pattern");
 				}
