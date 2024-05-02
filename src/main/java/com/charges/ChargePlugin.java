@@ -16,6 +16,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 
+import java.awt.event.KeyEvent;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,6 +36,7 @@ public class ChargePlugin extends Plugin
 	private ChargeConfig config;
 
 	private ChargeCalc set_amount;
+
 
 
 	@Override

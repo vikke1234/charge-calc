@@ -3,6 +3,7 @@ package com.charges;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Keybind;
 
 @ConfigGroup("Charge Calc")
 public interface ChargeConfig extends Config
@@ -70,5 +71,38 @@ public interface ChargeConfig extends Config
 	default int toaAmount()
 	{
 		return 5;
+	}
+
+	@ConfigItem(
+			position = 6,
+			keyName = "fillKeybind",
+			name = "Fill keybind",
+			description = "DOES NOT SUPPORT MODIFIERS"
+	)
+	default Keybind fillBind()
+	{
+		return Keybind.NOT_SET;
+	}
+
+	@ConfigItem(
+			position = 6,
+			keyName = "subKeybind",
+			name = "Subtract keybind",
+			description = "DOES NOT SUPPORT MODIFIERS"
+	)
+	default Keybind subBind()
+	{
+		return Keybind.NOT_SET;
+	}
+
+	@ConfigItem(
+			position = 6,
+			keyName = "enterKeybind",
+			name = "Enter keybind",
+			description = "DOES NOT SUPPORT MODIFIERS"
+	)
+	default Keybind enterBind()
+	{
+		return Keybind.NOT_SET;
 	}
 }
