@@ -243,7 +243,7 @@ public class ChargeCalc {
         if (total - quantity >= 0) {
             finalQuantity = total - quantity;
         } else {
-            finalQuantity = total;
+            finalQuantity = 0;
         }
         return finalQuantity;
     }
@@ -255,26 +255,27 @@ public class ChargeCalc {
         subtract.setText("-" + quantityStr);
         subtract.setAction(0, "Set to");
         subtract.setOnOpListener((JavaScriptCallback) ev -> {
-            Objects.requireNonNull(client.getWidget(WidgetInfo.CHATBOX_FULL_INPUT)).setText(quantityStr);
+            Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(quantityStr);
             client.setVarcStrValue(VarClientStr.INPUT_TEXT, quantityStr);
         });
 
         fill.setText("Fill");
         fill.setAction(0, "Fill");
         fill.setOnOpListener((JavaScriptCallback) ev -> {
-            Objects.requireNonNull(client.getWidget(WidgetInfo.CHATBOX_FULL_INPUT)).setText(totalStr);
+            Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(totalStr);
             client.setVarcStrValue(VarClientStr.INPUT_TEXT, totalStr);
         });
 
-        client.getWidget(WidgetInfo.CHATBOX_FULL_INPUT).setOnKeyListener((JavaScriptCallback) ev -> {
+        Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT))
+                .setOnKeyListener((JavaScriptCallback) ev -> {
             Integer awtEv = keyCodeMap.getOrDefault(ev.getTypedKeyCode(), -1);
             if (awtEv == config.enterBind().getKeyCode() || awtEv == KeyEvent.VK_ENTER) {
                 client.runScript(112, 84, 0, "");
             } else if (awtEv == config.fillBind().getKeyCode()) {
-                Objects.requireNonNull(client.getWidget(WidgetInfo.CHATBOX_FULL_INPUT)).setText(totalStr);
+                Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(totalStr);
                 client.setVarcStrValue(VarClientStr.INPUT_TEXT, totalStr);
             } else if (awtEv == config.subBind().getKeyCode()) {
-                Objects.requireNonNull(client.getWidget(WidgetInfo.CHATBOX_FULL_INPUT)).setText(quantityStr);
+                Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(quantityStr);
                 client.setVarcStrValue(VarClientStr.INPUT_TEXT, quantityStr);
             }
         });

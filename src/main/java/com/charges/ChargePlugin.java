@@ -53,8 +53,8 @@ public class ChargePlugin extends Plugin
 		}
 
 		clientThread.invokeLater(() -> {
-			set_amount = new ChargeCalc(client.getWidget(WidgetInfo.CHATBOX_CONTAINER), client);
-			String title = client.getWidget(WidgetInfo.CHATBOX_TITLE).getText();
+			set_amount = new ChargeCalc(client.getWidget(ComponentID.CHATBOX_CONTAINER), client);
+			String title = client.getWidget(ComponentID.CHATBOX_TITLE).getText();
 			Pattern title_pattern = Pattern.compile("How many (charges|scales) (do|would) you (like|wish|want) to (add|apply|use)?");
 			Matcher title_matcher = title_pattern.matcher(title);
 			if (title_matcher.find()) {
