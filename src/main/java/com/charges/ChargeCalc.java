@@ -168,13 +168,22 @@ public class ChargeCalc {
         final int []TOA_REGIONS = {
                 13455, // Lobby
                 14160, // Nexus
+
                 15698, // Crondis
                 15700, // Zebak
+
                 14162, // Scabaras
                 14164, // Kephri
+
                 15186, // Apmken
                 15188, // Baba
-                14674, // Wardens
+
+                14674, // Het
+                14676, // Akkha
+
+                15184, // Wardens
+                15696, // Wardens
+
                 14672, // Tomb
         };
 
@@ -239,13 +248,7 @@ public class ChargeCalc {
             quantity = config.amount();
         }
 
-        final int finalQuantity;
-        if (total - quantity >= 0) {
-            finalQuantity = total - quantity;
-        } else {
-            finalQuantity = 0;
-        }
-        return finalQuantity;
+        return Math.max(total - quantity, 0);
     }
     public void showWidget(ChargeConfig config, int total) {
         int quantity = getQuantity(config, total);
