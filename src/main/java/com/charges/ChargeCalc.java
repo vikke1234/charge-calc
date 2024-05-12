@@ -262,17 +262,17 @@ public class ChargeCalc {
         final String quantityStr = String.valueOf(quantity);
         final String totalStr = String.valueOf(total);
 
-        subtract.setText("-" + quantityStr);
+        subtract.setText("-" + (total - quantity));
         subtract.setAction(0, "Set to");
         subtract.setOnOpListener((JavaScriptCallback) ev -> {
-            Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(quantityStr);
+            Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(quantityStr + "*");
             client.setVarcStrValue(VarClientStr.INPUT_TEXT, quantityStr);
         });
 
         fill.setText("Fill");
         fill.setAction(0, "Fill");
         fill.setOnOpListener((JavaScriptCallback) ev -> {
-            Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(totalStr);
+            Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(totalStr + "*");
             client.setVarcStrValue(VarClientStr.INPUT_TEXT, totalStr);
         });
         int []numbers = {KeyEvent.VK_0, KeyEvent.VK_1, KeyEvent.VK_2, KeyEvent.VK_3, KeyEvent.VK_4, KeyEvent.VK_5,
