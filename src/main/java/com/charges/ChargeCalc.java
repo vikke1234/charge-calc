@@ -250,12 +250,6 @@ public class ChargeCalc {
 
         return Math.max(total - quantity, 0);
     }
-    private void handleNumbers(int n) {
-        String str = client.getVarcStrValue(VarClientStr.INPUT_TEXT);
-        str = str + n;
-        Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(str + "*");
-        client.setVarcStrValue(VarClientStr.INPUT_TEXT, str);
-    }
 
     public void showWidget(ChargeConfig config, int total) {
         int quantity = getQuantity(config, total);
@@ -275,16 +269,17 @@ public class ChargeCalc {
             Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(totalStr + "*");
             client.setVarcStrValue(VarClientStr.INPUT_TEXT, totalStr);
         });
-        int []numbers = {KeyEvent.VK_0, KeyEvent.VK_1, KeyEvent.VK_2, KeyEvent.VK_3, KeyEvent.VK_4, KeyEvent.VK_5,
-                KeyEvent.VK_6, KeyEvent.VK_7, KeyEvent.VK_8, KeyEvent.VK_9};
 
+        System.out.println("Type: " + client.getVarcIntValue(VarClientInt.INPUT_TYPE));
         Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT))
                 .setOnKeyListener((JavaScriptCallback) ev -> {
             // Numpad does not seem to be supported, getTypedKeyCode returns -1 on numpad usage.
             int typedCode = ev.getTypedKeyCode();
+
             Integer awtEv = keyCodeMap.getOrDefault(typedCode, -1);
 
-            if (awtEv == config.enterBind().getKeyCode() || awtEv == KeyEvent.VK_ENTER) {
+            if (awtEv == config.enterBind().getKeyCode()) {
+                // Enter sends 84, rest unused.
                 client.runScript(112, 84, 0, "");
             } else if (awtEv == config.fillBind().getKeyCode()) {
                 Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(totalStr + "*");
@@ -292,15 +287,9 @@ public class ChargeCalc {
             } else if (awtEv == config.subBind().getKeyCode()) {
                 Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(quantityStr + "*");
                 client.setVarcStrValue(VarClientStr.INPUT_TEXT, quantityStr);
-            } else if (Arrays.stream(numbers).anyMatch(n -> awtEv == n)) {
-                handleNumbers(awtEv - KeyEvent.VK_0);
-            } else if (awtEv == KeyEvent.VK_BACK_SPACE) {
-                String str = client.getVarcStrValue(VarClientStr.INPUT_TEXT);
-                str = str.substring(0, Math.max(str.length() - 1, 0));
-                Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(str + "*");
-                client.setVarcStrValue(VarClientStr.INPUT_TEXT, str);
+            } else {
+                client.runScript(112, ev.getTypedKeyCode(), ev.getTypedKeyChar(), "");
             }
         });
-
     }
 }
