@@ -159,10 +159,6 @@ public class ChargeCalc {
             return Area.COX;
         }
 
-        if (client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) != 0) {
-            return Area.TOB;
-        }
-
         final int []regions = client.getMapRegions();
 
         final int []TOA_REGIONS = {
@@ -203,7 +199,7 @@ public class ChargeCalc {
 
 
         if (Arrays.stream(regions).anyMatch(r -> Arrays.stream(TOB_REGIONS).anyMatch(reg -> reg == r))) {
-            return Area.TOA;
+            return Area.TOB;
         }
 
         if (Arrays.stream(regions).anyMatch(r -> Arrays.stream(TOA_REGIONS).anyMatch(reg -> reg == r))) {
