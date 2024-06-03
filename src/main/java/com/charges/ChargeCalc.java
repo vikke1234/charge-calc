@@ -129,7 +129,6 @@ public class ChargeCalc {
         subtract = parent.createChild(WidgetType.TEXT);
         fill = parent.createChild(WidgetType.TEXT);
 
-        System.out.println(parent.getWidth());
         prep(subtract, parent.getWidth() / 2 - 60, 5);
         prep(fill, parent.getWidth() / 2 + 30, 5);
     }
@@ -266,7 +265,6 @@ public class ChargeCalc {
             client.setVarcStrValue(VarClientStr.INPUT_TEXT, totalStr);
         });
 
-        System.out.println("Type: " + client.getVarcIntValue(VarClientInt.INPUT_TYPE));
         Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT))
                 .setOnKeyListener((JavaScriptCallback) ev -> {
             // Numpad does not seem to be supported, getTypedKeyCode returns -1 on numpad usage.
