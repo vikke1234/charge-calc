@@ -74,7 +74,7 @@ public interface ChargeConfig extends Config
 	}
 
 	@ConfigItem(
-			position = 6,
+			position = 7,
 			keyName = "fillKeybind",
 			name = "Fill keybind",
 			description = "DOES NOT SUPPORT MODIFIERS"
@@ -96,7 +96,7 @@ public interface ChargeConfig extends Config
 	}
 
 	@ConfigItem(
-			position = 6,
+			position = 8,
 			keyName = "enterKeybind",
 			name = "Enter keybind",
 			description = "DOES NOT SUPPORT MODIFIERS"
