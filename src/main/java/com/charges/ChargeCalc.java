@@ -7,7 +7,6 @@ import java.awt.event.KeyEvent;
 import java.util.*;
 
 public class ChargeCalc {
-    boolean skipNext;
     private final Client client;
     private Widget subtract;
     private Widget fill;
@@ -19,11 +18,6 @@ public class ChargeCalc {
         TOA,
         UNKNOWN,
     }
-
-    /**
-     * Maps VK -> chars
-     */
-    private static final Map<Integer, Integer> vkToChar = new HashMap<>();
 
     /**
      * OSRS keycode -> AWT keycode
@@ -125,65 +119,6 @@ public class ChargeCalc {
         keyCodeMap.put(KeyCode.KC_X, KeyEvent.VK_X);
         keyCodeMap.put(KeyCode.KC_Y, KeyEvent.VK_Y);
         keyCodeMap.put(KeyCode.KC_Z, KeyEvent.VK_Z);
-
-        vkToChar.put(KeyEvent.VK_A, (int) 'a');
-        vkToChar.put(KeyEvent.VK_B, (int) 'b');
-        vkToChar.put(KeyEvent.VK_C, (int) 'c');
-        vkToChar.put(KeyEvent.VK_D, (int) 'd');
-        vkToChar.put(KeyEvent.VK_E, (int) 'e');
-        vkToChar.put(KeyEvent.VK_F, (int) 'f');
-        vkToChar.put(KeyEvent.VK_G, (int) 'g');
-        vkToChar.put(KeyEvent.VK_H, (int) 'h');
-        vkToChar.put(KeyEvent.VK_I, (int) 'i');
-        vkToChar.put(KeyEvent.VK_J, (int) 'j');
-        vkToChar.put(KeyEvent.VK_K, (int) 'k');
-        vkToChar.put(KeyEvent.VK_L, (int) 'l');
-        vkToChar.put(KeyEvent.VK_M, (int) 'm');
-        vkToChar.put(KeyEvent.VK_N, (int) 'n');
-        vkToChar.put(KeyEvent.VK_O, (int) 'o');
-        vkToChar.put(KeyEvent.VK_P, (int) 'p');
-        vkToChar.put(KeyEvent.VK_Q, (int) 'q');
-        vkToChar.put(KeyEvent.VK_R, (int) 'r');
-        vkToChar.put(KeyEvent.VK_S, (int) 's');
-        vkToChar.put(KeyEvent.VK_T, (int) 't');
-        vkToChar.put(KeyEvent.VK_U, (int) 'u');
-        vkToChar.put(KeyEvent.VK_V, (int) 'v');
-        vkToChar.put(KeyEvent.VK_W, (int) 'w');
-        vkToChar.put(KeyEvent.VK_X, (int) 'x');
-        vkToChar.put(KeyEvent.VK_Y, (int) 'y');
-        vkToChar.put(KeyEvent.VK_Z, (int) 'z');
-        vkToChar.put(KeyEvent.VK_0, (int) '0');
-        vkToChar.put(KeyEvent.VK_1, (int) '1');
-        vkToChar.put(KeyEvent.VK_2, (int) '2');
-        vkToChar.put(KeyEvent.VK_3, (int) '3');
-        vkToChar.put(KeyEvent.VK_4, (int) '4');
-        vkToChar.put(KeyEvent.VK_5, (int) '5');
-        vkToChar.put(KeyEvent.VK_6, (int) '6');
-        vkToChar.put(KeyEvent.VK_7, (int) '7');
-        vkToChar.put(KeyEvent.VK_8, (int) '8');
-        vkToChar.put(KeyEvent.VK_9, (int) '9');
-        vkToChar.put(KeyEvent.VK_SPACE, (int) ' ');
-        vkToChar.put(KeyEvent.VK_ENTER, (int) '\n');
-        vkToChar.put(KeyEvent.VK_TAB, (int) '\t');
-        vkToChar.put(KeyEvent.VK_BACK_SPACE, (int) '\b');
-        vkToChar.put(KeyEvent.VK_COMMA, (int) ',');
-        vkToChar.put(KeyEvent.VK_PERIOD, (int) '.');
-        vkToChar.put(KeyEvent.VK_SLASH, (int) '/');
-        vkToChar.put(KeyEvent.VK_SEMICOLON, (int) ';');
-        vkToChar.put(KeyEvent.VK_EQUALS, (int) '=');
-        vkToChar.put(KeyEvent.VK_OPEN_BRACKET, (int) '[');
-        vkToChar.put(KeyEvent.VK_BACK_SLASH, (int) '\\');
-        vkToChar.put(KeyEvent.VK_CLOSE_BRACKET, (int) ']');
-        vkToChar.put(KeyEvent.VK_QUOTE, (int) '\'');
-        vkToChar.put(KeyEvent.VK_BACK_QUOTE, (int) '`');
-        vkToChar.put(KeyEvent.VK_MINUS, (int) '-');
-        vkToChar.put(KeyEvent.VK_PLUS, (int) '+');
-        vkToChar.put(KeyEvent.VK_MULTIPLY, (int) '*');
-        vkToChar.put(KeyEvent.VK_DIVIDE, (int) '/');
-        vkToChar.put(KeyEvent.VK_DECIMAL, (int) '.');
-        vkToChar.put(KeyEvent.VK_DELETE, 0x7E);
-        vkToChar.put(KeyEvent.VK_END, 0x3);
-        vkToChar.put(KeyEvent.VK_HOME, 0x2);
     }
     
 
@@ -192,7 +127,6 @@ public class ChargeCalc {
         if (parent == null) {
             return;
         }
-        this.skipNext = false;
         subtract = parent.createChild(WidgetType.TEXT);
         fill = parent.createChild(WidgetType.TEXT);
 
@@ -340,7 +274,13 @@ public class ChargeCalc {
             final int subBind   = config.subBind().getKeyCode();
             final int fillBind  = config.fillBind().getKeyCode();
 
-            final int awtEv = keyCodeMap.getOrDefault(typedCode, -1);
+            final int awtEv;
+            if (typedCode == -1) {
+                awtEv = typedChar;
+            } else {
+                awtEv = keyCodeMap.getOrDefault(typedCode, -1);
+            }
+            client.runScript(112, typedCode, typedChar, "");
 
             // Numpad works using only keychars, can't really make it ignored from keybinds.
             // This means that a VK_1 will map to VK_NUMPAD1.
@@ -349,20 +289,12 @@ public class ChargeCalc {
             if (awtEv == enterBind) {
                 // Enter sends 84, rest unused.
                 client.runScript(112, 84, 0, "");
-                skipNext = true;
             } else if (awtEv == fillBind) {
                 Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(totalStr + "*");
                 client.setVarcStrValue(VarClientStr.INPUT_TEXT, totalStr);
-                skipNext = true;
             } else if (awtEv == subBind) {
                 Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(quantityStr + "*");
                 client.setVarcStrValue(VarClientStr.INPUT_TEXT, quantityStr);
-                skipNext = true;
-            } else if (!skipNext) {
-                int ch = vkToChar.getOrDefault(awtEv, typedChar);
-                client.runScript(112, typedCode, ch, "");
-            } else {
-                skipNext = false;
             }
         });
     }
