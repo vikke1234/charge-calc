@@ -1,7 +1,17 @@
 package com.charges;
 
-import net.runelite.api.*;
-import net.runelite.api.widgets.*;
+import net.runelite.api.Client;
+import net.runelite.api.KeyCode;
+import net.runelite.api.FontID;
+import net.runelite.api.gameval.VarClientID;
+import net.runelite.api.gameval.VarbitID;
+import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.widgets.JavaScriptCallback;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetPositionMode;
+import net.runelite.api.widgets.WidgetSizeMode;
+import net.runelite.api.widgets.WidgetTextAlignment;
+import net.runelite.api.widgets.WidgetType;
 
 import java.awt.event.KeyEvent;
 import java.util.*;
@@ -155,11 +165,11 @@ public class ChargeCalc {
     }
 
     private Area getArea() {
-        if (client.getVarbitValue(Varbits.IN_RAID) != 0) {
+        if (client.getVarbitValue(VarbitID.RAIDS_CLIENT_INDUNGEON) != 0) {
             return Area.COX;
         }
 
-        final int []regions = client.getMapRegions();
+        final int []regions = client.getTopLevelWorldView().getMapRegions();
 
         final int []TOA_REGIONS = {
                 13455, // Lobby
@@ -255,17 +265,17 @@ public class ChargeCalc {
         subtract.setText("-" + (total - quantity));
         subtract.setAction(0, "Set to");
         subtract.setOnOpListener((JavaScriptCallback) ev -> {
-            Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(quantityStr + "*");
-            client.setVarcStrValue(VarClientStr.INPUT_TEXT, quantityStr);
+            Objects.requireNonNull(client.getWidget(InterfaceID.Chatbox.MES_TEXT2)).setText(quantityStr + "*");
+            client.setVarcStrValue(VarClientID.MESLAYERINPUT, quantityStr);
         });
 
         fill.setText("Fill");
         fill.setAction(0, "Fill");
         fill.setOnOpListener((JavaScriptCallback) ev -> {
-            Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(totalStr + "*");
-            client.setVarcStrValue(VarClientStr.INPUT_TEXT, totalStr);
+            Objects.requireNonNull(client.getWidget(InterfaceID.Chatbox.MES_TEXT2)).setText(totalStr + "*");
+            client.setVarcStrValue(VarClientID.MESLAYERINPUT, totalStr);
         });
-        Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT))
+        Objects.requireNonNull(client.getWidget(InterfaceID.Chatbox.MES_TEXT2))
                 .setOnKeyListener((JavaScriptCallback) ev -> {
             // Numpad does not seem to be supported, getTypedKeyCode returns -1 on numpad usage.
             final int typedCode = ev.getTypedKeyCode();
@@ -296,11 +306,11 @@ public class ChargeCalc {
                         .setCanSendPackets(true)
                         .run();
             } else if (awtEv == fillBind) {
-                Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(totalStr + "*");
-                client.setVarcStrValue(VarClientStr.INPUT_TEXT, totalStr);
+                Objects.requireNonNull(client.getWidget(InterfaceID.Chatbox.MES_TEXT2)).setText(totalStr + "*");
+                client.setVarcStrValue(VarClientID.MESLAYERINPUT, totalStr);
             } else if (awtEv == subBind) {
-                Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(quantityStr + "*");
-                client.setVarcStrValue(VarClientStr.INPUT_TEXT, quantityStr);
+                Objects.requireNonNull(client.getWidget(InterfaceID.Chatbox.MES_TEXT2)).setText(quantityStr + "*");
+                client.setVarcStrValue(VarClientID.MESLAYERINPUT, quantityStr);
             }
         });
     }
