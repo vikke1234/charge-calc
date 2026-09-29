@@ -75,9 +75,12 @@ jobs:
       # Force-sync fork with runelite/plugin-hub upstream, update manifest, and push
       - name: Sync with Upstream, Update Plugin Manifest, and Push
         if: github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.create_release)
+        env:
+          GH_TOKEN: ${{ secrets.PLUGIN_HUB_ACCESS }}
         run: |
           NEW_HASH="${{ github.sha }}"
           SOURCE_DIR="$(pwd)"
+          BRANCH_NAME="charge-calc-update"
 
           cd target-repo
 
@@ -106,13 +109,31 @@ jobs:
 
           cd target-repo
 
-          # Update the commit= line in the charge-calculator plugin file
+          # Update the commit= line in the charge-calc plugin file
           sed -i "s/^commit=.*/commit=${NEW_HASH}/" plugins/charge-calc
 
-          # Stage, commit, and force-push changes to your fork with commit titles in the body
+          # Stage and commit
           git add plugins/charge-calc
           git commit -m "Update charge-calc to ${NEW_HASH}" -m "${COMMIT_TITLES}" || exit 0
-          git push --force
+
+          # Push to dedicated branch
+          git checkout -B "$BRANCH_NAME"
+          git push --force origin "$BRANCH_NAME"
+
+          # Prepare PR body in a temp file to handle multiline safely
+          echo "Commit: ${NEW_HASH}" > pr_body.md
+          echo "" >> pr_body.md
+          echo "Changes:" >> pr_body.md
+          echo "${COMMIT_TITLES}" >> pr_body.md
+
+          # Check for existing PR from this branch and update if found
+          PR_NUMBER=$(gh pr list --repo runelite/plugin-hub --head "vikke1234:${BRANCH_NAME}" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          if [ -n "$PR_NUMBER" ]; then
+            echo "Updating existing PR #${PR_NUMBER}"
+            gh pr edit "$PR_NUMBER" --repo runelite/plugin-hub --title "Update charge-calc to ${NEW_HASH}" --body-file pr_body.md
+          else
+            echo "No existing PR found to update"
+          fi
 
       # Publish jar
       - name: Create Release on Source Repo
