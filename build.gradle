@@ -46,7 +46,7 @@ tasks.withType(Test).configureEach {
 tasks.register('shadowJar', Jar) {
     dependsOn configurations.testRuntimeClasspath
     manifest {
-        attributes('Main-Class': pluginMainClass, 'Multi-Release': true)
+        attributes('Main-Class': pluginMainClass)
     }
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
