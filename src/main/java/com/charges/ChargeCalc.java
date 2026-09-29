@@ -280,7 +280,10 @@ public class ChargeCalc {
             } else {
                 awtEv = keyCodeMap.getOrDefault(typedCode, -1);
             }
-            client.runScript(112, typedCode, typedChar, "");
+            client.createScriptEventBuilder(112, typedCode, typedChar, "")
+                    .build()
+                    .setCanSendPackets(true)
+                    .run();
 
             // Numpad works using only keychars, can't really make it ignored from keybinds.
             // This means that a VK_1 will map to VK_NUMPAD1.
@@ -288,7 +291,10 @@ public class ChargeCalc {
             // The only "real" solution would be afaik to write my own parser for the chat box, but I don't want to.
             if (awtEv == enterBind) {
                 // Enter sends 84, rest unused.
-                client.runScript(112, 84, 0, "");
+                client.createScriptEventBuilder(112, 84, 0, "")
+                        .build()
+                        .setCanSendPackets(true)
+                        .run();
             } else if (awtEv == fillBind) {
                 Objects.requireNonNull(client.getWidget(ComponentID.CHATBOX_FULL_INPUT)).setText(totalStr + "*");
                 client.setVarcStrValue(VarClientStr.INPUT_TEXT, totalStr);
