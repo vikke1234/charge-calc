@@ -64,7 +64,7 @@ public class ChargePlugin extends Plugin
 					int amount = Integer.parseInt(matcher.group(1).replace(",", ""));
 					set_amount.showWidget(config, amount);
 				} else {
-					System.out.println("Could not find pattern");
+					log.warn("Could not find pattern");
 				}
 			}
 		});
