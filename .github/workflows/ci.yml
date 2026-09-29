@@ -1,0 +1,147 @@
+name: Build with Gradle
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*' # Triggers automatically when pushing a version tag (e.g. v1.0.0)
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Update target repo & create release?'
+        type: boolean
+        required: true
+        default: true
+      version_tag:
+        description: 'Tag / Release Version (e.g., v1.0.0)'
+        required: false
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  checks: write
+  contents: write
+
+jobs:
+  gradle:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        with:
+          fetch-depth: 0 # Fetch full history to generate commit range logs
+
+      - uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4.2.1
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@8379f6a1328ee0e06e2bb424dadb7b159856a326 # v4.4.0
+
+      - name: Execute Gradle build
+        run: ./gradlew build
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v6
+        if: success() || failure()
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+
+      - name: Build shadowJar
+        run: ./gradlew shadowJar
+
+      - name: Upload shadowJar
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: charge-calculator-shadow
+          path: build/libs/*-all.jar
+
+      # Checkout plugin-hub fork
+      - name: Checkout Target Repository
+        if: github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.create_release)
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+        with:
+          repository: 'vikke1234/plugin-hub'
+          token: ${{ secrets.PLUGIN_HUB_ACCESS }}
+          path: 'target-repo'
+
+      # Force-sync fork with runelite/plugin-hub upstream, update manifest, and push
+      - name: Sync with Upstream, Update Plugin Manifest, and Push
+        if: github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.create_release)
+        run: |
+          NEW_HASH="${{ github.sha }}"
+          SOURCE_DIR="$(pwd)"
+
+          cd target-repo
+
+          # Git Identity Configuration
+          git config user.name "Viktor Horsmanheimo"
+          git config user.email "viktor.horsmanheimo@gmail.com"
+
+          # Fetch official runelite/plugin-hub upstream and force reset local branch to match upstream master
+          git remote add upstream https://github.com/runelite/plugin-hub.git
+          git fetch upstream
+          git reset --hard upstream/master
+
+          # Read the previous commit hash from the plugin manifest file before modifying it
+          OLD_HASH=$(grep -E '^commit=' plugins/charge-calc | cut -d'=' -f2 | tr -d '\r\n')
+          echo "Previous plugin-hub commit hash: ${OLD_HASH}"
+          echo "New plugin commit hash: ${NEW_HASH}"
+
+          # Extract commit titles from source repo between OLD_HASH and HEAD
+          cd "$SOURCE_DIR"
+          if [ -n "$OLD_HASH" ] && git cat-file -e "$OLD_HASH^{commit}" 2>/dev/null; then
+            COMMIT_TITLES=$(git log ${OLD_HASH}..${NEW_HASH} --oneline)
+          else
+            # Fallback if OLD_HASH isn't found in current history
+            COMMIT_TITLES=$(git log -1 --format="%s")
+          fi
+
+          cd target-repo
+
+          # Update the commit= line in the charge-calculator plugin file
+          sed -i "s/^commit=.*/commit=${NEW_HASH}/" plugins/charge-calc
+
+          # Stage, commit, and force-push changes to your fork with commit titles in the body
+          git add plugins/charge-calc
+          git commit -m "Update charge-calc to ${NEW_HASH}" -m "${COMMIT_TITLES}" || exit 0
+          git push --force
+
+      # Publish jar
+      - name: Create Release on Source Repo
+        if: github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.create_release)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG_NAME="${{ inputs.version_tag }}"
+          fi
+
+          # Find previous tag to extract commit log between releases
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          # Write release notes safely to a temporary file to prevent YAML syntax issues
+          echo "Automated release build for version ${TAG_NAME}" > release_notes.md
+          echo "" >> release_notes.md
+          echo "### What's Changed:" >> release_notes.md
+
+          if [ -n "$PREV_TAG" ]; then
+            echo "Generating release notes between ${PREV_TAG} and HEAD..."
+            git log ${PREV_TAG}..HEAD --oneline >> release_notes.md
+          else
+            echo "No previous tag found. Using current commit message..."
+            git log -1 --format="%s" >> release_notes.md
+          fi
+
+          # Create release directly on this repo using the notes file
+          gh release create "${TAG_NAME}" build/libs/*-all.jar \
+            --title "Release ${TAG_NAME}" \
+            --notes-file release_notes.md
